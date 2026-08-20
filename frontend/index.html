@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CollabRoute</title>
+    <!-- Utilisation de la police Inter pour un design minimaliste et épuré -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="app-container">
+        <!-- Écran de configuration -->
+        <section id="setup-screen" class="screen active">
+            <div class="setup-content">
+                <header class="setup-header">
+                    <h1>CollabRoute</h1>
+                    <p>Reliez les artistes à travers leurs collaborations musicales.</p>
+                </header>
+
+                <form id="setup-form" class="minimal-form">
+                    <div class="form-group">
+                        <label for="country">Pays de classement</label>
+                        <select id="country" name="country">
+                            <option value="any">Tous les pays</option>
+                            <!-- Les options seront injectées par JavaScript -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="min-popularity">
+                            Popularité minimale (<span id="pop-value">85</span>)
+                        </label>
+                        <input type="range" id="min-popularity" name="min_popularity" min="0" max="100" value="85">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="min-range">Liens min. (<span id="min-range-value">1</span>)</label>
+                            <input type="range" id="min-range" name="min_range" min="1" max="10" value="1">
+                        </div>
+                        <div class="form-group half">
+                            <label for="max-range">Liens max. (<span id="max-range-value">3</span>)</label>
+                            <input type="range" id="max-range" name="max_range" min="1" max="10" value="3">
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button type="submit" class="btn-solid" id="start-btn">
+                            <span class="btn-text">Générer une route</span>
+                            <span class="loader hidden"></span>
+                        </button>
+                    </div>
+                    <div id="setup-error" class="error-msg"></div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Écran de jeu -->
+        <section id="game-screen" class="screen">
+            <header class="game-header">
+                <button id="reset-btn" class="btn-text" aria-label="Nouvelle partie">
+                    &larr; Retour
+                </button>
+                <div class="target-header">
+                    <div class="target-container">
+                        <span class="target-label">Objectif :</span>
+                        <h2 id="target-artist-name" class="target-value">Nom de l'Artiste</h2>
+                    </div>
+                    <div class="target-container">
+                        <span class="target-label">Chemin le plus court :</span>
+                        <h2 id="shortest-route-length" class="target-value">1</h2>
+                    </div>
+                </div>
+            </header>
+
+            <div class="game-content">
+                <div class="path-timeline" id="path-container">
+                    <!-- Les nœuds du chemin seront injectés ici par JavaScript -->
+                </div>
+
+                <div class="search-section">
+                    <div class="search-wrapper">
+                        <input type="text" id="artist-search" placeholder="Rechercher une collaboration..."
+                            autocomplete="off">
+                        <ul id="search-results" class="search-dropdown hidden"></ul>
+                    </div>
+                    <div id="guess-feedback" class="feedback-msg"></div>
+                </div>
+            </div>
+
+            <!-- Modale de Victoire -->
+            <div id="victory-modal" class="modal hidden">
+                <div class="modal-dialog">
+                    <h2 class="modal-title">Félicitations !</h2>
+                    <p class="modal-desc">Vous avez réussi à relier les deux artistes.</p>
+                    <button class="btn-solid modal-btn" id="play-again-btn">Rejouer</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
