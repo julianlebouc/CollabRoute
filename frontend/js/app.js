@@ -292,13 +292,36 @@ function _onIncorrectGuess() {
 
 function _showVictory() {
     victoryModal.classList.remove('hidden');
-    const score     = Game.computeScore();
-    const moves     = Game.state.path.length - 1;
-    const hintCost  = Game.getTotalHintCost();
-    const hintInfo  = hintCost > 0 ? ` (dont −${Game.formatScore(hintCost)} pts d'indices)` : '';
+    const score      = Game.computeScore();
+    const distance   = Game.state.distance;
+    const moves      = Game.state.path.length - 1;
+    const extraMoves = Math.max(0, moves - distance);
+    const hintCost   = Game.getTotalHintCost();
+
     if (finalScoreEl) {
-        finalScoreEl.textContent =
-            `Score : ${Game.formatScore(score)} — ${moves} coup${moves > 1 ? 's' : ''}${hintInfo}`;
+        const rows = [
+            { label: 'Chemin le plus court', value: `${distance}` },
+            { label: `Indices`, value: hintCost > 0 ? `−${Game.formatScore(hintCost)}` : '0', dim: hintCost === 0 },
+            { label: 'Coups en trop', value: extraMoves > 0 ? `−${extraMoves}` : '0', dim: extraMoves === 0 },
+        ];
+
+        const rowsHtml = rows.map(r => `
+            <div class="receipt-row${r.dim ? ' receipt-row--dim' : ''}">
+                <span class="receipt-row__label">${r.label}</span>
+                <span class="receipt-row__value">${r.value}</span>
+            </div>`).join('');
+
+        finalScoreEl.innerHTML = `
+            <div class="receipt">
+                <div class="receipt-dashes"></div>
+                ${rowsHtml}
+                <div class="receipt-dashes"></div>
+                <div class="receipt-total">
+                    <span class="receipt-total__label">Score</span>
+                    <span class="receipt-total__value">${Game.formatScore(score)}</span>
+                </div>
+                <div class="receipt-dashes"></div>
+            </div>`;
     }
 }
 
