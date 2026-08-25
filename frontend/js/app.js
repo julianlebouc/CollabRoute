@@ -6,7 +6,11 @@ let gameState = {
     targetArtist: null,
     currentArtist: null,
     path: [],
-    distance: 0
+    distance: 0,
+    // nombre de coups minimaux (liens) du plus court chemin
+    shortestMoves: 0,
+    // score courant (calculé à partir de shortestMoves et du nombre de coups utilisés)
+    score: 0
 };
 
 // --- Éléments du DOM ---
@@ -167,7 +171,9 @@ async function handleStartGame(e) {
         gameState.sourceArtist = data.source;
         gameState.targetArtist = data.target;
         gameState.currentArtist = data.source;
-        gameState.distance = data.distance;
+        gameState.distance = data.distance; // nombre de nœuds dans le plus court chemin
+        gameState.shortestMoves = Math.max(0, data.distance - 1); // nombre de coups minimal (liens)
+        gameState.score = gameState.shortestMoves;
         gameState.path = [data.source];
 
         setupGameUI();
@@ -188,13 +194,33 @@ async function handleStartGame(e) {
  */
 function setupGameUI() {
     targetArtistName.textContent = gameState.targetArtist.name;
-    shortestRouteLength.textContent = gameState.distance - 1 + " Featuring(s)";
+    shortestRouteLength.textContent = gameState.shortestMoves + " Featuring(s)";
     searchInput.value = '';
     guessFeedback.textContent = '';
     guessFeedback.className = 'feedback-msg';
     victoryModal.classList.add('hidden');
     renderPath();
     searchInput.focus();
+}
+
+/**
+ * Calcule le score courant selon la règle :
+ * - Score initial = shortestMoves
+ * - Pour chaque coup au-delà de shortestMoves, on perd 1 point
+ */
+function computeScore() {
+    const S = gameState.shortestMoves || 0;
+    const movesMade = Math.max(0, gameState.path.length - 1);
+    if (movesMade <= S) return S;
+    // chaque coup au-delà de S retire 1 point
+    return Math.max(0, S - (movesMade - S));
+}
+
+function updateScoreDisplay() {
+    const el = document.getElementById('score-value');
+    if (!el) return;
+    const score = computeScore();
+    el.textContent = score;
 }
 
 /**
@@ -213,6 +239,8 @@ function renderPath() {
         `;
         pathContainer.appendChild(node);
     });
+    // Met à jour l'affichage du score à chaque rendu de chemin
+    updateScoreDisplay();
 }
 
 // --- Recherche et validation ---
@@ -296,7 +324,12 @@ function handleCorrectGuess(artist) {
 
         // Vérifie si on a gagné
         if (artist.id === gameState.targetArtist.id) {
+            // affiche le modal et le score final
             victoryModal.classList.remove('hidden');
+            const finalScoreEl = document.getElementById('final-score');
+            if (finalScoreEl) {
+                finalScoreEl.textContent = `Score final : ${computeScore()} (${gameState.path.length - 1} coups)`;
+            }
         } else {
             searchInput.focus();
         }
@@ -324,7 +357,9 @@ function resetGame() {
         targetArtist: null,
         currentArtist: null,
         path: [],
-        distance: 0
+        distance: 0,
+        shortestMoves: 0,
+        score: 0
     };
     setScreen('setup');
 }
