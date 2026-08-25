@@ -7,9 +7,6 @@ let gameState = {
     currentArtist: null,
     path: [],
     distance: 0,
-    // nombre de coups minimaux (liens) du plus court chemin
-    shortestMoves: 0,
-    // score courant (calculé à partir de shortestMoves et du nombre de coups utilisés)
     score: 0
 };
 
@@ -171,9 +168,8 @@ async function handleStartGame(e) {
         gameState.sourceArtist = data.source;
         gameState.targetArtist = data.target;
         gameState.currentArtist = data.source;
-        gameState.distance = data.distance; // nombre de nœuds dans le plus court chemin
-        gameState.shortestMoves = Math.max(0, data.distance - 1); // nombre de coups minimal (liens)
-        gameState.score = gameState.shortestMoves;
+        gameState.distance = data.distance; // nombre de liens dans le plus court chemin
+        gameState.score = gameState.distance; // score initial = distance minimale
         gameState.path = [data.source];
 
         setupGameUI();
@@ -194,7 +190,7 @@ async function handleStartGame(e) {
  */
 function setupGameUI() {
     targetArtistName.textContent = gameState.targetArtist.name;
-    shortestRouteLength.textContent = gameState.shortestMoves + " Featuring(s)";
+    shortestRouteLength.textContent = gameState.distance + " Featuring(s)";
     searchInput.value = '';
     guessFeedback.textContent = '';
     guessFeedback.className = 'feedback-msg';
@@ -205,11 +201,11 @@ function setupGameUI() {
 
 /**
  * Calcule le score courant selon la règle :
- * - Score initial = shortestMoves
- * - Pour chaque coup au-delà de shortestMoves, on perd 1 point
+ * - Score initial = distance
+ * - Pour chaque coup au-delà de distance, on perd 1 point
  */
 function computeScore() {
-    const S = gameState.shortestMoves || 0;
+    const S = gameState.distance || 0;
     const movesMade = Math.max(0, gameState.path.length - 1);
     if (movesMade <= S) return S;
     // chaque coup au-delà de S retire 1 point
@@ -358,7 +354,6 @@ function resetGame() {
         currentArtist: null,
         path: [],
         distance: 0,
-        shortestMoves: 0,
         score: 0
     };
     setScreen('setup');
