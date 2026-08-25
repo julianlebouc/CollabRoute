@@ -11,20 +11,18 @@
         content="CollabRoute, featurings, musique, artistes, collaborations, jeu musical, quiz musical, route musicale, deviner, spotify" />
     <meta name="author" content="Julian Lebouc" />
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://collabroute.cc/" />
     <meta property="og:title" content="CollabRoute — Reliez les artistes" />
-    <meta property="og:description"
-        content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
+    <meta property="og:description" content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
     <meta property="og:image" content="/logo192.svg" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://collabroute.cc/" />
     <meta property="twitter:title" content="CollabRoute — Reliez les artistes" />
-    <meta property="twitter:description"
-        content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
+    <meta property="twitter:description" content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
     <meta property="twitter:image" content="/logo192.svg" />
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -32,7 +30,6 @@
     <link rel="apple-touch-icon" href="/logo192.svg" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Utilisation de la police Inter pour un design minimaliste et épuré -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -41,7 +38,10 @@
 
 <body>
     <main class="app-container">
-        <!-- Écran de configuration -->
+
+        <!-- ═══════════════════════════════════════════
+             Écran de configuration
+        ═══════════════════════════════════════════ -->
         <section id="setup-screen" class="screen active">
             <div class="setup-content">
                 <header class="setup-header">
@@ -54,7 +54,6 @@
                         <label for="country">Pays de classement</label>
                         <select id="country" name="country">
                             <option value="any">Tous les pays</option>
-                            <!-- Les options seront injectées par JavaScript -->
                         </select>
                     </div>
 
@@ -87,7 +86,9 @@
             </div>
         </section>
 
-        <!-- Écran de jeu -->
+        <!-- ═══════════════════════════════════════════
+             Écran de jeu
+        ═══════════════════════════════════════════ -->
         <section id="game-screen" class="screen">
             <header class="game-header">
                 <button id="reset-btn" class="btn-text" aria-label="Nouvelle partie">
@@ -96,11 +97,11 @@
                 <div class="target-header">
                     <div class="target-container">
                         <span class="target-label">Objectif :</span>
-                        <h2 id="target-artist-name" class="target-value">Nom de l'Artiste</h2>
+                        <h2 id="target-artist-name" class="target-value">—</h2>
                     </div>
                     <div class="target-container">
                         <span class="target-label">Chemin le plus court :</span>
-                        <h2 id="shortest-route-length" class="target-value">1</h2>
+                        <h2 id="shortest-route-length" class="target-value">—</h2>
                     </div>
                     <div class="target-container">
                         <span class="target-label">Score :</span>
@@ -110,16 +111,30 @@
             </header>
 
             <div class="game-content">
-                <div class="path-timeline" id="path-container">
-                    <!-- Les nœuds du chemin seront injectés ici par JavaScript -->
-                </div>
+                <!-- Timeline du chemin parcouru -->
+                <div class="path-timeline" id="path-container"></div>
 
                 <div class="search-section">
+                    <!-- Barre de recherche -->
                     <div class="search-wrapper">
-                        <input type="text" id="artist-search" placeholder="Rechercher une collaboration..."
-                            autocomplete="off">
+                        <input type="text" id="artist-search"
+                               placeholder="Rechercher une collaboration..."
+                               autocomplete="off">
                         <ul id="search-results" class="search-dropdown hidden"></ul>
                     </div>
+
+                    <!-- Barre d'indices : séquentiels, sous la recherche -->
+                    <div class="hints-bar" role="group" aria-label="Indices disponibles">
+                        <span class="hints-bar__label">Indices :</span>
+                        <div id="hint-buttons" class="hints-bar__buttons">
+                            <!-- Injecté dynamiquement par hints.js -->
+                        </div>
+                    </div>
+
+                    <!-- Réponse de l'indice -->
+                    <div id="hint-display" class="hint-display hidden" aria-live="polite"></div>
+
+                    <!-- Feedback guess -->
                     <div id="guess-feedback" class="feedback-msg"></div>
                 </div>
             </div>
@@ -134,8 +149,19 @@
                 </div>
             </div>
         </section>
+
     </main>
 
+    <!--
+        Ordre de chargement important :
+        1. api.js     — aucune dépendance
+        2. game.js    — dépend de HintsModule (via window, évalué à runtime)
+        3. hints.js   — dépend de Api
+        4. app.js     — orchestrateur, dépend de Api + Game + HintsModule
+    -->
+    <script src="js/api.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/hints.js"></script>
     <script src="js/app.js"></script>
 </body>
 

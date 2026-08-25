@@ -1,67 +1,123 @@
+"""
+routes.py — Endpoints de l'API CollabRoute.
+
+Chaque route délègue à un service spécialisé injecté via Depends.
+Aucune logique métier ici : ce fichier ne fait qu'orchestrer.
+"""
 import json
 import logging
 from fastapi import APIRouter, HTTPException, Depends
-from backend.models.schemas import GameStartRequest, GuessRequest
+
+from backend.models.schemas import GameStartRequest, GuessRequest, HintRequest
 from backend.services.graph_service import GraphService
+from backend.services.game_service import GameService
+from backend.services.hint_service import HintService
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter(prefix="/api")
 
-# Injection de dépendance pour récupérer graph_service depuis app.state
-def get_graph_service():
+
+# ── Dépendances ───────────────────────────────────────────────────────────────
+
+def _get_graph_service() -> GraphService:
     from backend.main import app
     return app.state.graph_service
 
+
+def _get_game_service() -> GameService:
+    from backend.main import app
+    return app.state.game_service
+
+
+def _get_hint_service() -> HintService:
+    from backend.main import app
+    return app.state.hint_service
+
+
+# ── Routes ────────────────────────────────────────────────────────────────────
+
 @router.get("/countries")
 def get_countries():
-    """Renvoie la liste des pays disponibles."""
+    """Renvoie la liste des pays disponibles pour le filtrage."""
     try:
         with open('data/countries.json', 'r') as f:
             return json.load(f)
     except FileNotFoundError:
         return []
 
+
 @router.post("/game/start")
-def start_game(req: GameStartRequest, graph_service: GraphService = Depends(get_graph_service)):
-    """Initialise une nouvelle partie et renvoie l'artiste de départ et la cible."""
-    result = graph_service.find_route(
+def start_game(
+    req: GameStartRequest,
+    game_svc: GameService = Depends(_get_game_service),
+):
+    """Génère une nouvelle route et renvoie l'artiste de départ et la cible."""
+    result = game_svc.find_route(
         min_popularity=req.min_popularity,
         country=req.country,
         min_range=req.min_range,
-        max_range=req.max_range
+        max_range=req.max_range,
     )
-    
     if not result:
-        raise HTTPException(status_code=400, detail="Impossible de trouver une paire d'artistes avec ces critères. Essayez d'élargir la recherche.")
-        
-    source, chosen_target, chosen_dist, chosen_path = result
-    
-    path_names = [graph_service.get_artist(node).get('name', 'Unknown') for node in chosen_path]
-    logger.info(f"Generated Route (distance={chosen_dist}): {' -> '.join(path_names)}")
-    
+        raise HTTPException(
+            status_code=400,
+            detail="Impossible de trouver une paire d'artistes. Essayez d'élargir les critères.",
+        )
+
+    source_id, target_id, dist, _ = result
+    gs = game_svc.gs
     return {
-        "source": {"id": source, "name": graph_service.get_artist(source).get('name', 'Unknown')},
-        "target": {"id": chosen_target, "name": graph_service.get_artist(chosen_target).get('name', 'Unknown')},
-        "distance": chosen_dist
+        "source": {"id": source_id, "name": gs.get_artist(source_id).get('name', '?')},
+        "target": {"id": target_id, "name": gs.get_artist(target_id).get('name', '?')},
+        "distance": dist,
     }
 
+
 @router.get("/search")
-def search_artists(q: str, graph_service: GraphService = Depends(get_graph_service)):
-    """Autocomplétion pour la recherche d'artistes."""
-    return graph_service.search_artists(q)
+def search_artists(
+    q: str,
+    gs: GraphService = Depends(_get_graph_service),
+):
+    """Autocomplétion : retourne les artistes dont le nom contient la requête."""
+    return gs.search_artists(q)
+
 
 @router.post("/game/guess")
-def check_guess(req: GuessRequest, graph_service: GraphService = Depends(get_graph_service)):
-    """Vérifie si l'artiste deviné a collaboré avec l'artiste actuel."""
-    if not graph_service.get_artist(req.current_artist_id) or not graph_service.get_artist(req.guessed_artist_id):
+def check_guess(
+    req: GuessRequest,
+    gs: GraphService = Depends(_get_graph_service),
+):
+    """Vérifie si l'artiste proposé a bien collaboré avec l'artiste actuel."""
+    if not gs.get_artist(req.current_artist_id) or not gs.get_artist(req.guessed_artist_id):
         raise HTTPException(status_code=404, detail="Artiste introuvable.")
-        
-    is_linked = graph_service.is_linked(req.current_artist_id, req.guessed_artist_id)
+
+    is_linked = gs.is_linked(req.current_artist_id, req.guessed_artist_id)
     return {
         "is_linked": is_linked,
         "guessed_artist": {
             "id": req.guessed_artist_id,
-            "name": graph_service.get_artist(req.guessed_artist_id).get("name", "Unknown")
-        }
+            "name": gs.get_artist(req.guessed_artist_id).get("name", "?"),
+        },
     }
+
+
+@router.post("/game/hint")
+def get_hint(
+    req: HintRequest,
+    hint_svc: HintService = Depends(_get_hint_service),
+):
+    """
+    Retourne un indice calculé depuis l'artiste actuel vers la cible.
+    Niveaux : 1=genres, 2=nb chars masqué, 3=initiales masquées, 4=nom complet+id.
+    Les niveaux 1-3 ne révèlent jamais le nom réel de l'artiste.
+    """
+    if not hint_svc.gs.get_artist(req.current_artist_id):
+        raise HTTPException(status_code=404, detail="Artiste actuel introuvable.")
+    if not hint_svc.gs.get_artist(req.target_artist_id):
+        raise HTTPException(status_code=404, detail="Artiste cible introuvable.")
+
+    return hint_svc.get_hint(
+        current_id=req.current_artist_id,
+        target_id=req.target_artist_id,
+        hint_level=req.hint_level,
+    )
