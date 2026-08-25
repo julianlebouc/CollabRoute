@@ -6,7 +6,14 @@
  *  - Calculer le score (coups effectués + coût des indices)
  *  - Méthodes pures : pas de DOM, pas d'appels réseau
  *
- * Dépendances : HintsModule (pour getCost dans computeScore)
+ * Scoring :
+ *  - Score de base = distance (nombre de coups optimaux)
+ *  - Chaque coup au-delà du chemin optimal = −1 pt
+ *  - Indices 1–3 = −0.5 pt chacun ; indice 4 = −1 pt
+ *  - Les coûts d'indices s'accumulent sur toute la partie
+ *  - Pas de plancher : le score peut être négatif
+ *
+ * Dépendances : HintsModule (pour getCost() du tour en cours)
  * Expose un objet global `Game`.
  */
 
@@ -14,11 +21,12 @@ const Game = {
     // ── État de la partie ─────────────────────────────────────────────────────
 
     state: {
-        sourceArtist: null,   // { id: string, name: string }
-        targetArtist: null,   // { id: string, name: string }
-        currentArtist: null,  // { id: string, name: string }
-        path: [],             // [{ id, name }, ...] — historique des coups
-        distance: 0,          // longueur du chemin optimal (nombre de coups min)
+        sourceArtist:   null,  // { id: string, name: string }
+        targetArtist:   null,  // { id: string, name: string }
+        currentArtist:  null,  // { id: string, name: string }
+        path:           [],    // [{ id, name }, ...] — historique des coups
+        distance:       0,     // longueur du chemin optimal (nombre de coups min)
+        totalHintCost:  0,     // coût cumulé des indices sur TOUTE la partie
     },
 
     // ── Initialisation / Reset ────────────────────────────────────────────────
@@ -33,6 +41,7 @@ const Game = {
         this.state.currentArtist = data.source;
         this.state.distance      = data.distance;
         this.state.path          = [data.source];
+        this.state.totalHintCost = 0;
     },
 
     /**
@@ -40,11 +49,12 @@ const Game = {
      */
     reset() {
         this.state = {
-            sourceArtist: null,
-            targetArtist: null,
+            sourceArtist:  null,
+            targetArtist:  null,
             currentArtist: null,
-            path: [],
-            distance: 0,
+            path:          [],
+            distance:      0,
+            totalHintCost: 0,
         };
     },
 
@@ -71,19 +81,36 @@ const Game = {
     // ── Scoring ───────────────────────────────────────────────────────────────
 
     /**
+     * Archive le coût d'indices du tour courant dans totalHintCost,
+     * AVANT d'appeler HintsModule.reset().
+     * Doit être appelé par app.js lors de chaque bonne réponse.
+     */
+    commitHintCost() {
+        if (typeof HintsModule !== 'undefined') {
+            this.state.totalHintCost += HintsModule.getCost();
+        }
+    },
+
+    /**
+     * Retourne le coût total des indices sur toute la partie
+     * (tours archivés + tour en cours).
+     * @returns {number}
+     */
+    getTotalHintCost() {
+        const currentTurnCost = (typeof HintsModule !== 'undefined') ? HintsModule.getCost() : 0;
+        return this.state.totalHintCost + currentTurnCost;
+    },
+
+    /**
      * Calcule le score courant :
-     *  - Score de base = distance (coups optimaux)
-     *  - Chaque coup au-delà de distance = -1 point
-     *  - Coût cumulé des indices utilisés déduit
-     *  - Minimum 0
+     *  score = distance − max(0, moves − distance) − totalHintCost
      * @returns {number}
      */
     computeScore() {
         const S     = this.state.distance || 0;
         const moves = Math.max(0, this.state.path.length - 1);
-        const hintCost = (typeof HintsModule !== 'undefined') ? HintsModule.getCost() : 0;
-        const raw   = (moves <= S) ? S : S - (moves - S);
-        return Math.max(0, raw - hintCost);
+        const raw   = S - Math.max(0, moves - S);
+        return raw - this.getTotalHintCost();
     },
 
     /**

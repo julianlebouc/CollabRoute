@@ -97,6 +97,9 @@ function _applyHintResponse(data) {
     _hintState.totalCost += hint_cost;
     _hintState.nextLevel  = hint_level + 1;
 
+    // Mise à jour en temps réel du score affiché
+    window._onScoreUpdate?.();
+
     if (hint_level === 4 && data.best_neighbor_id) {
         _showHint(hint_level, hint, true);
         // Délai court pour que l'affichage soit visible avant l'auto-guess

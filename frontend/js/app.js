@@ -49,6 +49,7 @@ const playAgainBtn       = document.getElementById('play-again-btn');
 
 window._getCurrentArtistId = () => Game.state.currentArtist?.id ?? null;
 window._getTargetArtistId  = () => Game.state.targetArtist?.id  ?? null;
+window._onScoreUpdate      = () => _updateScore();
 
 // ── Initialisation ────────────────────────────────────────────────────────────
 
@@ -195,6 +196,11 @@ function _renderPath() {
 function _updateScore() {
     if (scoreValueEl) {
         scoreValueEl.textContent = Game.formatScore(Game.computeScore());
+        // Animation flash subtile
+        scoreValueEl.classList.remove('score-flash');
+        // Force reflow pour relancer l'animation si elle est déjà active
+        void scoreValueEl.offsetWidth;
+        scoreValueEl.classList.add('score-flash');
     }
 }
 
@@ -264,7 +270,8 @@ function _onCorrectGuess(artist) {
         if (Game.isVictory(artist.id)) {
             _showVictory();
         } else {
-            // Nouveau tour : réinitialise les indices pour l'artiste suivant
+            // Archive le coût d'indices du tour avant de réinitialiser
+            Game.commitHintCost();
             HintsModule.reset();
             searchInput.focus();
         }
@@ -287,7 +294,7 @@ function _showVictory() {
     victoryModal.classList.remove('hidden');
     const score     = Game.computeScore();
     const moves     = Game.state.path.length - 1;
-    const hintCost  = HintsModule.getCost();
+    const hintCost  = Game.getTotalHintCost();
     const hintInfo  = hintCost > 0 ? ` (dont −${Game.formatScore(hintCost)} pts d'indices)` : '';
     if (finalScoreEl) {
         finalScoreEl.textContent =

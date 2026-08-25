@@ -404,3 +404,126 @@ button.btn-text:hover {
         transform: rotate(360deg);
     }
 }
+
+@keyframes score-flash {
+    0%   { opacity: 1; transform: scale(1); }
+    30%  { opacity: 0.5; transform: scale(0.92); }
+    60%  { opacity: 1; transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.score-flash {
+    animation: score-flash 0.35s ease;
+}
+
+/* ── Hints Bar ─────────────────────────────────────────────────────────────── */
+
+.hints-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.hints-bar__label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.hints-bar__buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Base hint button */
+.hint-btn {
+    font-family: var(--font-family);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: 2px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    white-space: nowrap;
+}
+
+/* Available — clickable */
+.hint-btn--available {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+    background: transparent;
+}
+
+.hint-btn--available:hover {
+    background-color: var(--text-primary);
+    color: var(--bg-color);
+}
+
+/* Used — greyed out with strikethrough */
+.hint-btn--used {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background: var(--bg-color);
+    text-decoration: line-through;
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Locked — not yet reachable */
+.hint-btn--locked {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background: transparent;
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Loading — spinner state */
+.hint-btn--loading {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background: transparent;
+    cursor: wait;
+    opacity: 0.6;
+}
+
+/* ── Hint Display ───────────────────────────────────────────────────────────── */
+
+.hint-display {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    border-left: 2px solid var(--accent-color);
+    background: transparent;
+    font-size: 0.875rem;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    animation: fadeIn 0.25s ease;
+}
+
+.hint-display__label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.hint-display__value {
+    color: var(--text-secondary);
+}
+
+.hint-display__value--reveal {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.hint-display__error {
+    color: var(--error-color);
+}
