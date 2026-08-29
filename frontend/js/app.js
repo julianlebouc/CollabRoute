@@ -19,16 +19,16 @@ const screens = {
     game:  document.getElementById('game-screen'),
 };
 
-const setupForm    = document.getElementById('setup-form');
-const countrySelect = document.getElementById('country');
-const popSlider    = document.getElementById('min-popularity');
-const popValue     = document.getElementById('pop-value');
-const minRangeSlider = document.getElementById('min-range');
-const minRangeValue  = document.getElementById('min-range-value');
-const maxRangeSlider = document.getElementById('max-range');
-const maxRangeValue  = document.getElementById('max-range-value');
-const startBtn     = document.getElementById('start-btn');
-const setupError   = document.getElementById('setup-error');
+const setupForm       = document.getElementById('setup-form');
+const countrySelect   = document.getElementById('country');
+const followersSlider = document.getElementById('min-followers');
+const followersValue  = document.getElementById('followers-value');
+const minRangeSlider  = document.getElementById('min-range');
+const minRangeValue   = document.getElementById('min-range-value');
+const maxRangeSlider  = document.getElementById('max-range');
+const maxRangeValue   = document.getElementById('max-range-value');
+const startBtn        = document.getElementById('start-btn');
+const setupError      = document.getElementById('setup-error');
 
 // ── Références DOM — Jeu ──────────────────────────────────────────────────────
 
@@ -77,8 +77,8 @@ async function _loadCountries() {
 // ── Écouteurs — Formulaire de configuration ────────────────────────────────────
 
 function _setupFormListeners() {
-    popSlider.addEventListener('input', (e) => {
-        popValue.textContent = e.target.value;
+    followersSlider.addEventListener('input', (e) => {
+        followersValue.textContent = _formatFollowers(parseInt(e.target.value));
     });
 
     minRangeSlider.addEventListener('input', (e) => {
@@ -142,10 +142,10 @@ async function _handleStartGame(e) {
     const fd = new FormData(setupForm);
     try {
         const data = await Api.startGame({
-            country:        fd.get('country'),
-            min_popularity: parseInt(fd.get('min_popularity')),
-            min_range:      parseInt(fd.get('min_range')),
-            max_range:      parseInt(fd.get('max_range')),
+            country:       fd.get('country'),
+            min_followers: parseInt(fd.get('min_followers')),
+            min_range:     parseInt(fd.get('min_range')),
+            max_range:     parseInt(fd.get('max_range')),
         });
 
         Game.init(data);
@@ -334,6 +334,16 @@ function _resetGame() {
 }
 
 // ── Utilitaires feedback ───────────────────────────────────────────────────────
+
+/**
+ * Formate un nombre de followers en chaîne lisible (ex: 500k, 1.5M).
+ * @param {number} n
+ * @returns {string}
+ */
+function _formatFollowers(n) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+    return `${Math.round(n / 1_000)}k`;
+}
 
 function _showFeedback(msg, type) {
     guessFeedback.textContent = msg;

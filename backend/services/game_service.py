@@ -5,6 +5,11 @@ Responsabilités :
   - Trouver une paire source/cible valide selon les critères de filtrage
   - Utilise le graphe de GraphService pour les parcours BFS
   - Ne contient PAS de logique d'affichage ni de calcul d'indices
+
+Filtrage :
+  - min_followers : seuil absolu de followers Deezer
+  - country       : source ET cible doivent appartenir au pays sélectionné
+                    (ignoré si 'any')
 """
 import logging
 import random
@@ -25,28 +30,29 @@ class GameService:
 
     def find_route(
         self,
-        min_popularity: int,
+        min_followers: int,
         country: Optional[str],
         min_range: int,
         max_range: int,
     ) -> Optional[Tuple[str, str, int, List[str]]]:
         """
         Cherche une paire (source, cible) avec un chemin de longueur dans
-        [min_range+1, max_range+1], filtrée par popularité et pays.
+        [min_range+1, max_range+1], filtrée par followers et pays.
+
+        Quand un pays est sélectionné, source ET cible doivent en être.
 
         Retourne (source_id, target_id, distance, path_ids) ou None.
         """
         G = self.gs.G
         min_dist = min_range + 1
         max_dist = max_range + 1
-        target_countries = {country.lower()} if country and country != "any" else set()
+        target_country = country.upper() if country and country != "any" else None
 
-        # Filtrage des candidats selon popularité et pays de classement
         candidates = {
             node
             for node, data in G.nodes(data=True)
-            if data.get('popularity', 0) >= min_popularity
-            and (not target_countries or bool(target_countries & data.get('hit_countries', set())))
+            if data.get('followers', 0) >= min_followers
+            and (target_country is None or data.get('country', '') == target_country)
         }
 
         if len(candidates) < 2:

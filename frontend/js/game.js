@@ -9,7 +9,7 @@
  * Scoring :
  *  - Score de base = distance (nombre de coups optimaux)
  *  - Chaque coup au-delà du chemin optimal = −1 pt
- *  - Indices 1–3 = −0.5 pt chacun ; indice 4 = −1 pt
+ *  - Indices 1–2 = −0.5 pt chacun ; indice 3 (révélation) = −1 pt
  *  - Les coûts d'indices s'accumulent sur toute la partie
  *  - Pas de plancher : le score peut être négatif
  *

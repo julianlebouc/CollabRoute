@@ -40,7 +40,7 @@ const Api = {
 
     /**
      * Démarre une nouvelle partie avec les paramètres donnés.
-     * @param {{ country: string, min_popularity: number, min_range: number, max_range: number }} params
+     * @param {{ country: string, min_followers: number, min_range: number, max_range: number }} params
      * @returns {Promise<{ source, target, distance }>}
      */
     startGame(params) {
@@ -53,7 +53,7 @@ const Api = {
     /**
      * Recherche des artistes pour l'autocomplétion.
      * @param {string} query
-     * @returns {Promise<{ id, name, popularity }[]>}
+     * @returns {Promise<{ id, name, followers }[]>}
      */
     searchArtists(query) {
         return _apiFetch(`/search?q=${encodeURIComponent(query)}`);

@@ -4,8 +4,11 @@ hint_service.py — Calcul et formatage des indices.
 Responsabilités :
   - Trouver le meilleur voisin (le plus proche de la cible depuis l'artiste actuel)
     via un seul BFS depuis la cible (efficace sur grand graphe)
-  - Formater l'indice selon le niveau (1=genres, 2=chars masqués, 3=initiales, 4=révéler)
-  - Garantir qu'aucune info permettant de tricher n'est exposée pour les niveaux 1-3
+  - Formater l'indice selon le niveau :
+      1 — Caractères masqués (**** ****)
+      2 — Initiales masquées (D*** P***)
+      3 — Nom complet + ID (révélation, auto-guess côté client)
+  - Garantir qu'aucune info permettant de tricher n'est exposée pour les niveaux 1-2
 """
 import logging
 from typing import Optional
@@ -17,7 +20,7 @@ from backend.services.graph_service import GraphService
 logger = logging.getLogger(__name__)
 
 # Coût en points déduit du score par niveau d'indice utilisé
-HINT_COSTS = {1: 0.5, 2: 0.5, 3: 0.5, 4: 1.0}
+HINT_COSTS = {1: 0.5, 2: 0.5, 3: 1.0}
 
 
 class HintService:
@@ -55,10 +58,6 @@ class HintService:
         best = min(neighbors, key=lambda n: distances.get(n, float('inf')))
         return best if distances.get(best, float('inf')) < float('inf') else None
 
-    def _format_genres(self, genres: list) -> str:
-        """['nordic house', 'russelater'] → 'Nordic House, Russelater'"""
-        return ", ".join(g.title() for g in genres) if genres else "Inconnu"
-
     def _mask_chars(self, name: str) -> str:
         """'Daft Punk' → '**** ****'"""
         return "".join("*" if c != " " else " " for c in name)
@@ -85,12 +84,11 @@ class HintService:
         Calcule et retourne un indice structuré.
 
         Niveaux :
-          1 — Genres musicaux (Title Case)
-          2 — Nombre de caractères masqué (**** ****)
-          3 — Initiales masquées (D*** P***)
-          4 — Nom complet + ID (pour auto-guess côté client)
+          1 — Caractères masqués (**** ****)
+          2 — Initiales masquées (D*** P***)
+          3 — Nom complet + ID (pour auto-guess côté client)
 
-        Les niveaux 1-3 ne révèlent jamais le nom réel de l'artiste.
+        Les niveaux 1-2 ne révèlent jamais le nom réel de l'artiste.
         """
         neighbor_id = self._find_best_neighbor(current_id, target_id)
 
@@ -105,17 +103,15 @@ class HintService:
         name = artist.get('name', 'Artiste inconnu')
 
         if hint_level == 1:
-            hint_text = self._format_genres(artist.get('genres', []))
-        elif hint_level == 2:
             hint_text = self._mask_chars(name)
-        elif hint_level == 3:
+        elif hint_level == 2:
             hint_text = self._mask_initials(name)
-        elif hint_level == 4:
-            # Niveau 4 : révélation complète — le client déclenche un auto-guess
+        elif hint_level == 3:
+            # Niveau 3 : révélation complète — le client déclenche un auto-guess
             return {
                 "hint": name,
-                "hint_level": 4,
-                "hint_cost": HINT_COSTS[4],
+                "hint_level": 3,
+                "hint_cost": HINT_COSTS[3],
                 "best_neighbor_id": neighbor_id,
             }
         else:

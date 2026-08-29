@@ -4,7 +4,6 @@ routes.py — Endpoints de l'API CollabRoute.
 Chaque route délègue à un service spécialisé injecté via Depends.
 Aucune logique métier ici : ce fichier ne fait qu'orchestrer.
 """
-import json
 import logging
 from fastapi import APIRouter, HTTPException, Depends
 
@@ -37,13 +36,11 @@ def _get_hint_service() -> HintService:
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.get("/countries")
-def get_countries():
-    """Renvoie la liste des pays disponibles pour le filtrage."""
-    try:
-        with open('data/countries.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
+def get_countries(
+    gs: GraphService = Depends(_get_graph_service),
+):
+    """Renvoie la liste des pays disponibles pour le filtrage, dérivée du graphe en mémoire."""
+    return gs.get_countries()
 
 
 @router.post("/game/start")
@@ -53,7 +50,7 @@ def start_game(
 ):
     """Génère une nouvelle route et renvoie l'artiste de départ et la cible."""
     result = game_svc.find_route(
-        min_popularity=req.min_popularity,
+        min_followers=req.min_followers,
         country=req.country,
         min_range=req.min_range,
         max_range=req.max_range,
@@ -108,8 +105,8 @@ def get_hint(
 ):
     """
     Retourne un indice calculé depuis l'artiste actuel vers la cible.
-    Niveaux : 1=genres, 2=nb chars masqué, 3=initiales masquées, 4=nom complet+id.
-    Les niveaux 1-3 ne révèlent jamais le nom réel de l'artiste.
+    Niveaux : 1=chars masqués, 2=initiales masquées, 3=nom complet+id (révélation).
+    Les niveaux 1-2 ne révèlent jamais le nom réel de l'artiste.
     """
     if not hint_svc.gs.get_artist(req.current_artist_id):
         raise HTTPException(status_code=404, detail="Artiste actuel introuvable.")

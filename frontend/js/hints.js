@@ -5,24 +5,23 @@
  *  - Maintenir l'état des indices (niveau suivant disponible, coût cumulé)
  *  - Rendre les boutons d'indices dynamiquement (séquentiels, grisés si non disponibles)
  *  - Appeler Api.getHint() et afficher la réponse
- *  - Déclencher un auto-guess via callback pour le niveau 4
+ *  - Déclencher un auto-guess via callback pour le niveau 3 (révélation)
  *  - Exposer getCost() pour que Game.computeScore() puisse déduire les pénalités
  *
  * Dépendances : Api (api.js)
  * Expose un objet global `HintsModule`.
  */
 
-// Définition des 4 indices dans leur ordre séquentiel
+// Définition des 3 indices dans leur ordre séquentiel
 const HINT_DEFINITIONS = [
-    { level: 1, label: 'Genres Musicaux',      cost: 0.5 },
-    { level: 2, label: 'Nombre de caractères', cost: 0.5 },
-    { level: 3, label: 'Initiales',            cost: 0.5 },
-    { level: 4, label: 'Révéler',              cost: 1.0 },
+    { level: 1, label: 'Nombre de caractères', cost: 0.5 },
+    { level: 2, label: 'Initiales',            cost: 0.5 },
+    { level: 3, label: 'Révéler',              cost: 1.0 },
 ];
 
 // État interne du module
 let _hintState = {
-    nextLevel: 1,       // prochain niveau déverrouillable (1 à 4, puis 5 = tous utilisés)
+    nextLevel: 1,       // prochain niveau déverrouillable (1 à 3, puis 4 = tous utilisés)
     totalCost: 0,       // coût cumulé des indices utilisés ce tour
     isLoading: false,   // verrou anti-double-clic
 };
@@ -100,7 +99,7 @@ function _applyHintResponse(data) {
     // Mise à jour en temps réel du score affiché
     window._onScoreUpdate?.();
 
-    if (hint_level === 4 && data.best_neighbor_id) {
+    if (hint_level === 3 && data.best_neighbor_id) {
         _showHint(hint_level, hint, true);
         // Délai court pour que l'affichage soit visible avant l'auto-guess
         setTimeout(() => {
