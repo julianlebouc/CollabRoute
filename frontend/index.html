@@ -15,14 +15,16 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://collabroute.cc/" />
     <meta property="og:title" content="CollabRoute — Reliez les artistes" />
-    <meta property="og:description" content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
+    <meta property="og:description"
+        content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
     <meta property="og:image" content="/logo192.svg" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://collabroute.cc/" />
     <meta property="twitter:title" content="CollabRoute — Reliez les artistes" />
-    <meta property="twitter:description" content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
+    <meta property="twitter:description"
+        content="Reliez les artistes à travers leurs collaborations musicales dans ce jeu inédit." />
     <meta property="twitter:image" content="/logo192.svg" />
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -51,7 +53,7 @@
 
                 <form id="setup-form" class="minimal-form">
                     <div class="form-group">
-                        <label for="country">Pays de classement</label>
+                        <label for="country">Pays</label>
                         <select id="country" name="country">
                             <option value="any">Tous les pays</option>
                         </select>
@@ -61,7 +63,8 @@
                         <label for="min-followers">
                             Followers Deezer min. (<span id="followers-value">500k</span>)
                         </label>
-                        <input type="range" id="min-followers" name="min_followers" min="100000" max="2000000" step="100000" value="500000">
+                        <input type="range" id="min-followers" name="min_followers" min="100000" max="2000000"
+                            step="100000" value="500000">
                     </div>
 
                     <div class="form-row">
@@ -117,9 +120,8 @@
                 <div class="search-section">
                     <!-- Barre de recherche -->
                     <div class="search-wrapper">
-                        <input type="text" id="artist-search"
-                               placeholder="Rechercher une collaboration..."
-                               autocomplete="off">
+                        <input type="text" id="artist-search" placeholder="Rechercher une collaboration..."
+                            autocomplete="off">
                         <ul id="search-results" class="search-dropdown hidden"></ul>
                     </div>
 

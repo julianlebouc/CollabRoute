@@ -25,6 +25,8 @@ class GraphService:
         self.G: nx.Graph = nx.Graph()
         self.nodes_data: Dict[str, dict] = {}
         self.artists_list: List[dict] = []
+        self.max_followers: int = 0
+        self.min_followers: int = 0
         self._load(nodes_path, edges_path)
 
     # ── Chargement ────────────────────────────────────────────────────────────
@@ -35,11 +37,16 @@ class GraphService:
         nodes_df = pd.read_csv(nodes_path)
 
         nodes_to_add = []
+        max_followers = 0
+        min_followers = None
 
         for _, row in nodes_df.iterrows():
             artist_id  = str(row['artist_id'])
             followers  = int(row['followers']) if pd.notna(row['followers']) else 0
             country    = str(row['country']).strip().upper() if pd.notna(row['country']) else ''
+            max_followers = max(max_followers, followers)
+            if followers > 0:
+                min_followers = followers if min_followers is None else min(min_followers, followers)
 
             attr = {
                 'name':      str(row['name']),
@@ -56,6 +63,8 @@ class GraphService:
                     'followers': followers,
                 })
 
+        self.max_followers = max_followers
+        self.min_followers = min_followers or 0
         self.G.add_nodes_from(nodes_to_add)
 
         logger.info("Loading edges CSV...")

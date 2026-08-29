@@ -63,10 +63,22 @@ def start_game(
 
     source_id, target_id, dist, _ = result
     gs = game_svc.gs
+    source = gs.get_artist(source_id)
+    target = gs.get_artist(target_id)
     return {
-        "source": {"id": source_id, "name": gs.get_artist(source_id).get('name', '?')},
-        "target": {"id": target_id, "name": gs.get_artist(target_id).get('name', '?')},
+        "source": {
+            "id": source_id,
+            "name": source.get('name', '?'),
+            "followers": source.get('followers', 0),
+        },
+        "target": {
+            "id": target_id,
+            "name": target.get('name', '?'),
+            "followers": target.get('followers', 0),
+        },
         "distance": dist,
+        "max_followers": gs.max_followers,
+        "min_followers": gs.min_followers,
     }
 
 
@@ -89,11 +101,13 @@ def check_guess(
         raise HTTPException(status_code=404, detail="Artiste introuvable.")
 
     is_linked = gs.is_linked(req.current_artist_id, req.guessed_artist_id)
+    guessed = gs.get_artist(req.guessed_artist_id)
     return {
         "is_linked": is_linked,
         "guessed_artist": {
-            "id": req.guessed_artist_id,
-            "name": gs.get_artist(req.guessed_artist_id).get("name", "?"),
+            "id":       req.guessed_artist_id,
+            "name":     guessed.get("name", "?"),
+            "followers": guessed.get("followers", 0),
         },
     }
 

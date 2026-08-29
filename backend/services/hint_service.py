@@ -20,7 +20,7 @@ from backend.services.graph_service import GraphService
 logger = logging.getLogger(__name__)
 
 # Coût en points déduit du score par niveau d'indice utilisé
-HINT_COSTS = {1: 0.5, 2: 0.5, 3: 1.0}
+HINT_COSTS = {1: 1.0, 2: 1.0, 3: 2.0}
 
 
 class HintService:
@@ -96,7 +96,7 @@ class HintService:
             return {
                 "hint": "Aucun chemin trouvé depuis cet artiste.",
                 "hint_level": hint_level,
-                "hint_cost": HINT_COSTS.get(hint_level, 0.5),
+                "hint_cost": HINT_COSTS.get(hint_level, 1.0),
             }
 
         artist = self.gs.get_artist(neighbor_id)
@@ -113,6 +113,7 @@ class HintService:
                 "hint_level": 3,
                 "hint_cost": HINT_COSTS[3],
                 "best_neighbor_id": neighbor_id,
+                "followers": artist.get('followers', 0),
             }
         else:
             hint_text = "Niveau d'indice invalide."
@@ -120,5 +121,5 @@ class HintService:
         return {
             "hint": hint_text,
             "hint_level": hint_level,
-            "hint_cost": HINT_COSTS.get(hint_level, 0.5),
+            "hint_cost": HINT_COSTS.get(hint_level, 1.0),
         }

@@ -14,9 +14,9 @@
 
 // Définition des 3 indices dans leur ordre séquentiel
 const HINT_DEFINITIONS = [
-    { level: 1, label: 'Nombre de caractères', cost: 0.5 },
-    { level: 2, label: 'Initiales',            cost: 0.5 },
-    { level: 3, label: 'Révéler',              cost: 1.0 },
+    { level: 1, label: 'Nombre de caractères', cost: 1.0 },
+    { level: 2, label: 'Initiales', cost: 1.0 },
+    { level: 3, label: 'Révéler', cost: 2.0 },
 ];
 
 // État interne du module
@@ -70,7 +70,7 @@ async function _requestHint(level) {
     if (_hintState.isLoading || level !== _hintState.nextLevel) return;
 
     const currentId = window._getCurrentArtistId?.();
-    const targetId  = window._getTargetArtistId?.();
+    const targetId = window._getTargetArtistId?.();
     if (!currentId || !targetId) return;
 
     _hintState.isLoading = true;
@@ -94,7 +94,7 @@ function _applyHintResponse(data) {
     const { hint, hint_level, hint_cost } = data;
 
     _hintState.totalCost += hint_cost;
-    _hintState.nextLevel  = hint_level + 1;
+    _hintState.nextLevel = hint_level + 1;
 
     // Mise à jour en temps réel du score affiché
     window._onScoreUpdate?.();
@@ -103,7 +103,11 @@ function _applyHintResponse(data) {
         _showHint(hint_level, hint, true);
         // Délai court pour que l'affichage soit visible avant l'auto-guess
         setTimeout(() => {
-            _onRevealCallback?.({ id: data.best_neighbor_id, name: hint });
+            _onRevealCallback?.({
+                id: data.best_neighbor_id,
+                name: hint,
+                followers: data.followers ?? 0,
+            });
         }, 800);
     } else {
         _showHint(hint_level, hint, false);
@@ -120,14 +124,14 @@ function _renderButtons() {
 
     HINT_DEFINITIONS.forEach(({ level, label }) => {
         const btn = document.createElement('button');
-        btn.id        = `hint-btn-${level}`;
+        btn.id = `hint-btn-${level}`;
         btn.className = 'hint-btn';
         btn.textContent = label;
         btn.setAttribute('aria-label', `Indice niveau ${level} : ${label}`);
 
-        const isUsed      = level < _hintState.nextLevel;
+        const isUsed = level < _hintState.nextLevel;
         const isAvailable = level === _hintState.nextLevel && !_hintState.isLoading;
-        const isLocked    = level > _hintState.nextLevel || _hintState.isLoading;
+        const isLocked = level > _hintState.nextLevel || _hintState.isLoading;
 
         if (isUsed) {
             btn.classList.add('hint-btn--used');

@@ -16,40 +16,40 @@
 
 const screens = {
     setup: document.getElementById('setup-screen'),
-    game:  document.getElementById('game-screen'),
+    game: document.getElementById('game-screen'),
 };
 
-const setupForm       = document.getElementById('setup-form');
-const countrySelect   = document.getElementById('country');
+const setupForm = document.getElementById('setup-form');
+const countrySelect = document.getElementById('country');
 const followersSlider = document.getElementById('min-followers');
-const followersValue  = document.getElementById('followers-value');
-const minRangeSlider  = document.getElementById('min-range');
-const minRangeValue   = document.getElementById('min-range-value');
-const maxRangeSlider  = document.getElementById('max-range');
-const maxRangeValue   = document.getElementById('max-range-value');
-const startBtn        = document.getElementById('start-btn');
-const setupError      = document.getElementById('setup-error');
+const followersValue = document.getElementById('followers-value');
+const minRangeSlider = document.getElementById('min-range');
+const minRangeValue = document.getElementById('min-range-value');
+const maxRangeSlider = document.getElementById('max-range');
+const maxRangeValue = document.getElementById('max-range-value');
+const startBtn = document.getElementById('start-btn');
+const setupError = document.getElementById('setup-error');
 
 // ── Références DOM — Jeu ──────────────────────────────────────────────────────
 
-const targetArtistName   = document.getElementById('target-artist-name');
-const shortestRouteEl    = document.getElementById('shortest-route-length');
-const scoreValueEl       = document.getElementById('score-value');
-const pathContainer      = document.getElementById('path-container');
-const searchInput        = document.getElementById('artist-search');
-const searchResults      = document.getElementById('search-results');
-const guessFeedback      = document.getElementById('guess-feedback');
-const resetBtn           = document.getElementById('reset-btn');
-const victoryModal       = document.getElementById('victory-modal');
-const finalScoreEl       = document.getElementById('final-score');
-const playAgainBtn       = document.getElementById('play-again-btn');
+const targetArtistName = document.getElementById('target-artist-name');
+const shortestRouteEl = document.getElementById('shortest-route-length');
+const scoreValueEl = document.getElementById('score-value');
+const pathContainer = document.getElementById('path-container');
+const searchInput = document.getElementById('artist-search');
+const searchResults = document.getElementById('search-results');
+const guessFeedback = document.getElementById('guess-feedback');
+const resetBtn = document.getElementById('reset-btn');
+const victoryModal = document.getElementById('victory-modal');
+const finalScoreEl = document.getElementById('final-score');
+const playAgainBtn = document.getElementById('play-again-btn');
 
 // ── Accesseurs exposés pour hints.js ──────────────────────────────────────────
 // hints.js ne connaît pas Game directement → passage via window
 
 window._getCurrentArtistId = () => Game.state.currentArtist?.id ?? null;
-window._getTargetArtistId  = () => Game.state.targetArtist?.id  ?? null;
-window._onScoreUpdate      = () => _updateScore();
+window._getTargetArtistId = () => Game.state.targetArtist?.id ?? null;
+window._onScoreUpdate = () => _updateScore();
 
 // ── Initialisation ────────────────────────────────────────────────────────────
 
@@ -65,7 +65,7 @@ async function _loadCountries() {
         const countries = await Api.getCountries();
         countries.forEach(code => {
             const opt = document.createElement('option');
-            opt.value       = code;
+            opt.value = code;
             opt.textContent = code.toUpperCase();
             countrySelect.appendChild(opt);
         });
@@ -134,7 +134,7 @@ async function _handleStartGame(e) {
     setupError.textContent = '';
 
     const btnText = startBtn.querySelector('.btn-text');
-    const loader  = startBtn.querySelector('.loader');
+    const loader = startBtn.querySelector('.loader');
     btnText.classList.add('hidden');
     loader.classList.remove('hidden');
     startBtn.disabled = true;
@@ -142,10 +142,10 @@ async function _handleStartGame(e) {
     const fd = new FormData(setupForm);
     try {
         const data = await Api.startGame({
-            country:       fd.get('country'),
+            country: fd.get('country'),
             min_followers: parseInt(fd.get('min_followers')),
-            min_range:     parseInt(fd.get('min_range')),
-            max_range:     parseInt(fd.get('max_range')),
+            min_range: parseInt(fd.get('min_range')),
+            max_range: parseInt(fd.get('max_range')),
         });
 
         Game.init(data);
@@ -163,11 +163,11 @@ async function _handleStartGame(e) {
 
 function _setupGameUI() {
     targetArtistName.textContent = Game.state.targetArtist.name;
-    shortestRouteEl.textContent  = `${Game.state.distance} Featuring(s)`;
-    searchInput.value            = '';
-    searchInput.disabled         = false;
-    guessFeedback.textContent    = '';
-    guessFeedback.className      = 'feedback-msg';
+    shortestRouteEl.textContent = `${Game.state.distance} Featuring(s)`;
+    searchInput.value = '';
+    searchInput.disabled = false;
+    guessFeedback.textContent = '';
+    guessFeedback.className = 'feedback-msg';
     victoryModal.classList.add('hidden');
     HintsModule.reset();
     _renderPath();
@@ -236,7 +236,7 @@ async function _performSearch(query) {
 
 async function _handleGuess(artist) {
     _hideDropdown();
-    searchInput.value    = artist.name;
+    searchInput.value = artist.name;
     searchInput.disabled = true;
 
     try {
@@ -252,7 +252,7 @@ async function _handleGuess(artist) {
     }
 }
 
-/** Callback déclenché par HintsModule au niveau 4 (révélation automatique). */
+/** Callback déclenché par HintsModule au niveau 3 (révélation automatique). */
 function _handleAutoGuess(artist) {
     _handleGuess(artist);
 }
@@ -263,7 +263,7 @@ function _onCorrectGuess(artist) {
     _renderPath();
 
     setTimeout(() => {
-        searchInput.value    = '';
+        searchInput.value = '';
         searchInput.disabled = false;
         _clearFeedback();
 
@@ -281,7 +281,7 @@ function _onCorrectGuess(artist) {
 function _onIncorrectGuess() {
     _showFeedback("Mauvaise piste ! Réessayez.", 'error');
     setTimeout(() => {
-        searchInput.value    = '';
+        searchInput.value = '';
         searchInput.disabled = false;
         _clearFeedback();
         searchInput.focus();
@@ -292,21 +292,23 @@ function _onIncorrectGuess() {
 
 function _showVictory() {
     victoryModal.classList.remove('hidden');
-    const score      = Game.computeScore();
-    const distance   = Game.state.distance;
-    const moves      = Game.state.path.length - 1;
+    const score = Game.computeScore();
+    const distance = Game.state.distance;
+    const moves = Game.state.path.length - 1;
     const extraMoves = Math.max(0, moves - distance);
-    const hintCost   = Game.getTotalHintCost();
+    const hintCost = Game.getTotalHintCost();
+    const multiplier = Game.computeObscurityMultiplier();
 
     if (finalScoreEl) {
         const rows = [
             { label: 'Chemin le plus court', value: `${distance}` },
-            { label: `Indices`, value: hintCost > 0 ? `−${Game.formatScore(hintCost)}` : '0', dim: hintCost === 0 },
+            { label: 'Multiplicateur obscurité', value: `×${multiplier.toFixed(2)}`, highlight: multiplier > 1.0 },
+            { label: 'Indices', value: hintCost > 0 ? `−${Game.formatScore(hintCost)}` : '0', dim: hintCost === 0 },
             { label: 'Coups en trop', value: extraMoves > 0 ? `−${extraMoves}` : '0', dim: extraMoves === 0 },
         ];
 
         const rowsHtml = rows.map(r => `
-            <div class="receipt-row${r.dim ? ' receipt-row--dim' : ''}">
+            <div class="receipt-row${r.dim ? ' receipt-row--dim' : ''}${r.highlight ? ' receipt-row--highlight' : ''}">
                 <span class="receipt-row__label">${r.label}</span>
                 <span class="receipt-row__value">${r.value}</span>
             </div>`).join('');
@@ -347,12 +349,12 @@ function _formatFollowers(n) {
 
 function _showFeedback(msg, type) {
     guessFeedback.textContent = msg;
-    guessFeedback.className   = `feedback-msg ${type}`;
+    guessFeedback.className = `feedback-msg ${type}`;
 }
 
 function _clearFeedback() {
     guessFeedback.textContent = '';
-    guessFeedback.className   = 'feedback-msg';
+    guessFeedback.className = 'feedback-msg';
 }
 
 // ── Démarrage ─────────────────────────────────────────────────────────────────

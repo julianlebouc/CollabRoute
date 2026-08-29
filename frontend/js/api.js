@@ -31,7 +31,7 @@ async function _apiFetch(endpoint, options = {}) {
 
 const Api = {
     /**
-     * Récupère la liste des pays de classement disponibles.
+     * Récupère la liste des pays disponibles.
      * @returns {Promise<string[]>}
      */
     getCountries() {
