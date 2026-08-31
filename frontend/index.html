@@ -78,6 +78,33 @@
                         </div>
                     </div>
 
+                    <!-- Sélecteur de difficulté -->
+                    <div class="form-group">
+                        <label>Mode de jeu</label>
+                        <div class="difficulty-cards" id="difficulty-cards" role="radiogroup" aria-label="Mode de jeu">
+                            <button type="button" class="difficulty-card difficulty-card--selected" id="diff-easy"
+                                data-difficulty="easy" role="radio" aria-checked="true">
+                                <span class="difficulty-card__title">Facile</span>
+                                <span class="difficulty-card__desc">Choix parmi les collaborateurs • Distance affichée •
+                                    Indice 1 gratuit</span>
+                            </button>
+                            <button type="button" class="difficulty-card" id="diff-normal" data-difficulty="normal"
+                                role="radio" aria-checked="false">
+                                <span class="difficulty-card__title">Normal</span>
+                                <span class="difficulty-card__desc">Recherche libre • Distance affichée • Indice 1
+                                    gratuit</span>
+                            </button>
+                            <button type="button" class="difficulty-card" id="diff-hard" data-difficulty="hard"
+                                role="radio" aria-checked="false">
+                                <span class="difficulty-card__title">Difficile</span>
+                                <span class="difficulty-card__desc">Recherche libre • Pas d'aide • Indices
+                                    payants</span>
+                            </button>
+                        </div>
+                        <!-- Champ caché pour transmettre la difficulté -->
+                        <input type="hidden" id="difficulty-input" name="difficulty" value="easy">
+                    </div>
+
                     <div class="action-bar">
                         <button type="submit" class="btn-solid" id="start-btn">
                             <span class="btn-text">Générer une route</span>
@@ -99,16 +126,18 @@
                 </button>
                 <div class="target-header">
                     <div class="target-container">
-                        <span class="target-label">Objectif :</span>
-                        <h2 id="target-artist-name" class="target-value">—</h2>
-                    </div>
-                    <div class="target-container">
-                        <span class="target-label">Chemin le plus court :</span>
-                        <h2 id="shortest-route-length" class="target-value">—</h2>
-                    </div>
-                    <div class="target-container">
                         <span class="target-label">Score :</span>
                         <h2 id="score-value" class="target-value">0</h2>
+                    </div>
+                    <!-- Badge distance — visible uniquement en easy/normal -->
+                    <div class="target-container" id="distance-container" style="display:none">
+                        <span class="target-label">Distance restante :</span>
+                        <h2 id="distance-value" class="target-value">—</h2>
+                    </div>
+                    <!-- Badge mode de jeu -->
+                    <div class="target-container">
+                        <span class="target-label">Mode :</span>
+                        <h2 id="mode-badge" class="target-value mode-badge">—</h2>
                     </div>
                 </div>
             </header>
@@ -118,8 +147,14 @@
                 <div class="path-timeline" id="path-container"></div>
 
                 <div class="search-section">
-                    <!-- Barre de recherche -->
-                    <div class="search-wrapper">
+                    <!-- Mode Easy : grille de collaborateurs cliquables -->
+                    <div id="collaborators-section" class="collaborators-section hidden">
+                        <p class="collaborators-label">Choisissez un collaborateur :</p>
+                        <div id="collaborators-grid" class="collaborators-grid"></div>
+                    </div>
+
+                    <!-- Mode Normal / Hard : barre de recherche -->
+                    <div id="search-wrapper-section" class="search-wrapper">
                         <input type="text" id="artist-search" placeholder="Rechercher une collaboration..."
                             autocomplete="off">
                         <ul id="search-results" class="search-dropdown hidden"></ul>

@@ -103,3 +103,37 @@ class GraphService:
             return []
         q = query.lower()
         return [a for a in self.artists_list if q in a['name'].lower()][:limit]
+
+    def get_neighbors(self, artist_id: str, limit: int = 20) -> List[dict]:
+        """
+        Retourne les voisins directs d'un artiste dans le graphe,
+        triés par followers décroissants, limités à `limit` résultats.
+        Utilisé en mode Easy pour afficher les collaborateurs cliquables.
+        """
+        if artist_id not in self.G:
+            return []
+        neighbors = [
+            {
+                'id': n,
+                'name': self.nodes_data[n].get('name', '?'),
+                'followers': self.nodes_data[n].get('followers', 0),
+            }
+            for n in self.G.neighbors(artist_id)
+            if n in self.nodes_data
+        ]
+        neighbors.sort(key=lambda x: x['followers'], reverse=True)
+        return neighbors[:limit]
+
+    def get_distance(self, from_id: str, to_id: str) -> Optional[int]:
+        """
+        Retourne la distance BFS (chemin le plus court) entre deux artistes.
+        Retourne None si l'un des artistes est introuvable ou s'ils ne sont pas connectés.
+        """
+        if from_id not in self.G or to_id not in self.G:
+            return None
+        if from_id == to_id:
+            return 0
+        try:
+            return nx.shortest_path_length(self.G, from_id, to_id)
+        except nx.NetworkXNoPath:
+            return None

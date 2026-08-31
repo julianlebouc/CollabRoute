@@ -92,4 +92,23 @@ const Api = {
             }),
         });
     },
+
+    /**
+     * Retourne les collaborateurs directs d'un artiste (mode Easy).
+     * @param {string} artistId
+     * @returns {Promise<{ id, name, followers }[]>}
+     */
+    getNeighbors(artistId) {
+        return _apiFetch(`/game/neighbors?artist_id=${encodeURIComponent(artistId)}`);
+    },
+
+    /**
+     * Retourne la distance BFS entre deux artistes (modes Easy et Normal).
+     * @param {string} fromId
+     * @param {string} toId
+     * @returns {Promise<{ distance: number|null }>}
+     */
+    getDistance(fromId, toId) {
+        return _apiFetch(`/game/distance?from_id=${encodeURIComponent(fromId)}&to_id=${encodeURIComponent(toId)}`);
+    },
 };

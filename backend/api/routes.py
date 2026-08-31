@@ -132,3 +132,36 @@ def get_hint(
         target_id=req.target_artist_id,
         hint_level=req.hint_level,
     )
+
+
+@router.get("/game/neighbors")
+def get_neighbors(
+    artist_id: str,
+    gs: GraphService = Depends(_get_graph_service),
+):
+    """
+    Retourne les voisins directs d'un artiste (collaborateurs),
+    triés par followers décroissants, limités à 20.
+    Utilisé en mode Easy pour afficher les collaborateurs cliquables.
+    """
+    if not gs.get_artist(artist_id):
+        raise HTTPException(status_code=404, detail="Artiste introuvable.")
+    return gs.get_neighbors(artist_id)
+
+
+@router.get("/game/distance")
+def get_distance(
+    from_id: str,
+    to_id: str,
+    gs: GraphService = Depends(_get_graph_service),
+):
+    """
+    Retourne la distance BFS (chemin le plus court) entre deux artistes.
+    Utilisé en modes Easy et Normal pour afficher la distance restante.
+    """
+    if not gs.get_artist(from_id):
+        raise HTTPException(status_code=404, detail="Artiste de départ introuvable.")
+    if not gs.get_artist(to_id):
+        raise HTTPException(status_code=404, detail="Artiste cible introuvable.")
+    dist = gs.get_distance(from_id, to_id)
+    return {"distance": dist}

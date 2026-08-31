@@ -14,9 +14,9 @@
 
 // Définition des 3 indices dans leur ordre séquentiel
 const HINT_DEFINITIONS = [
-    { level: 1, label: 'Nombre de caractères', cost: 1.0 },
-    { level: 2, label: 'Initiales', cost: 1.0 },
-    { level: 3, label: 'Révéler', cost: 2.0 },
+    { level: 1, label: 'Nombre de caractères', baseCost: 1.0 },
+    { level: 2, label: 'Initiales', baseCost: 1.0 },
+    { level: 3, label: 'Révéler', baseCost: 2.0 },
 ];
 
 // État interne du module
@@ -25,6 +25,9 @@ let _hintState = {
     totalCost: 0,       // coût cumulé des indices utilisés ce tour
     isLoading: false,   // verrou anti-double-clic
 };
+
+// Difficulté courante — détermine si le premier indice est gratuit
+let _hintDifficulty = 'hard';
 
 // Callback déclenché par le niveau 4 (auto-guess)
 let _onRevealCallback = null;
@@ -36,9 +39,11 @@ const HintsModule = {
      * Initialise le module avec le callback d'auto-guess (niveau 4).
      * Doit être appelé une fois au démarrage de l'app.
      * @param {function({ id: string, name: string }): void} onReveal
+     * @param {'easy'|'normal'|'hard'} difficulty
      */
-    init(onReveal) {
+    init(onReveal, difficulty = 'hard') {
         _onRevealCallback = onReveal;
+        _hintDifficulty = difficulty;
         _renderButtons();
     },
 
@@ -89,9 +94,16 @@ async function _requestHint(level) {
 
 /**
  * Applique la réponse du serveur : met à jour l'état et l'affichage.
+ * Le coût effectif est toujours 0 pour le niveau 1 en mode easy/normal.
  */
 function _applyHintResponse(data) {
-    const { hint, hint_level, hint_cost } = data;
+    const { hint, hint_level } = data;
+    let hint_cost = data.hint_cost;
+
+    // En mode easy/normal, le premier indice est gratuit
+    if (hint_level === 1 && _hintDifficulty !== 'hard') {
+        hint_cost = 0;
+    }
 
     _hintState.totalCost += hint_cost;
     _hintState.nextLevel = hint_level + 1;
@@ -122,16 +134,23 @@ function _renderButtons() {
 
     container.innerHTML = '';
 
-    HINT_DEFINITIONS.forEach(({ level, label }) => {
+    HINT_DEFINITIONS.forEach(({ level, label, baseCost }) => {
+        const isFree = (level === 1 && _hintDifficulty !== 'hard');
+        const effectiveCost = isFree ? 0 : baseCost;
+
         const btn = document.createElement('button');
         btn.id = `hint-btn-${level}`;
         btn.className = 'hint-btn';
-        btn.textContent = label;
-        btn.setAttribute('aria-label', `Indice niveau ${level} : ${label}`);
+
+        // Label avec coût affiché
+        const costBadge = isFree
+            ? `<span class="hint-btn__cost hint-btn__cost--free">gratuit</span>`
+            : `<span class="hint-btn__cost">−${effectiveCost}pt</span>`;
+        btn.innerHTML = `<span class="hint-btn__label">${_escape(label)}</span>${costBadge}`;
+        btn.setAttribute('aria-label', `Indice niveau ${level} : ${label}${isFree ? ' (gratuit)' : ` (−${effectiveCost}pt)`}`);
 
         const isUsed = level < _hintState.nextLevel;
         const isAvailable = level === _hintState.nextLevel && !_hintState.isLoading;
-        const isLocked = level > _hintState.nextLevel || _hintState.isLoading;
 
         if (isUsed) {
             btn.classList.add('hint-btn--used');

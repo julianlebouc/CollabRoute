@@ -28,7 +28,8 @@ const Game = {
         targetArtist: null,  // { id: string, name: string, followers: number }
         currentArtist: null,  // { id: string, name: string, followers: number }
         path: [],    // [{ id, name, followers }, ...] — historique des coups
-        distance: 0,     // longueur du chemin optimal (nombre de coups min)
+        distance: 0,     // longueur du chemin optimal INITIAL (ne change pas, utilisé pour le score)
+        currentDistance: 0,  // distance BFS restante depuis la position courante jusqu'à la cible
         maxFollowers: 0,     // valeur maximum dans le dataset (borne haute)
         minFollowers: 0,     // valeur minimum dans le dataset (borne basse)
         totalHintCost: 0,     // coût cumulé des indices sur TOUTE la partie
@@ -45,6 +46,7 @@ const Game = {
         this.state.targetArtist = data.target;
         this.state.currentArtist = data.source;
         this.state.distance = data.distance;
+        this.state.currentDistance = data.distance;  // starts equal to initial distance
         this.state.maxFollowers = data.max_followers || 0;
         this.state.minFollowers = data.min_followers || 0;
         this.state.path = [data.source];
@@ -61,6 +63,7 @@ const Game = {
             currentArtist: null,
             path: [],
             distance: 0,
+            currentDistance: 0,
             maxFollowers: 0,
             minFollowers: 0,
             totalHintCost: 0,
@@ -76,6 +79,15 @@ const Game = {
     advanceTo(artist) {
         this.state.path.push(artist);
         this.state.currentArtist = artist;
+    },
+
+    /**
+     * Met à jour la distance BFS restante depuis la position courante.
+     * Appelé par app.js après chaque coup correct, depuis la réponse de l'API.
+     * @param {number} d
+     */
+    setCurrentDistance(d) {
+        this.state.currentDistance = d;
     },
 
     /**
