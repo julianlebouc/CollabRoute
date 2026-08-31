@@ -39,6 +39,9 @@
 </head>
 
 <body>
+    <!-- Topographic contour-line background (drawn by topo-bg.js) -->
+    <canvas id="topo-bg" aria-hidden="true"></canvas>
+
     <main class="app-container">
 
         <!-- ═══════════════════════════════════════════
@@ -196,6 +199,7 @@
         3. hints.js   — dépend de Api
         4. app.js     — orchestrateur, dépend de Api + Game + HintsModule
     -->
+    <script src="js/topo-bg.js"></script>
     <script src="js/api.js"></script>
     <script src="js/game.js"></script>
     <script src="js/hints.js"></script>

@@ -29,6 +29,17 @@ body {
     flex-direction: column;
 }
 
+/* ── Topography map background canvas ──────────────────────────────────────── */
+
+#topo-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+}
+
 /* Typography */
 h1 {
     font-size: 2.5rem;
@@ -54,6 +65,7 @@ p {
     display: flex;
     flex-direction: column;
     position: relative;
+    z-index: 1;
     width: 100%;
 }
 
@@ -82,6 +94,7 @@ p {
 .setup-header {
     text-align: center;
     margin-bottom: 3rem;
+    background-color: var(--bg-color);
 }
 
 /* Forms */
@@ -167,7 +180,7 @@ input[type="range"] {
 }
 
 button.btn-text {
-    background: none;
+    background-color: var(--bg-color);
     border: none;
     color: var(--text-secondary);
     font-family: var(--font-family);
@@ -234,24 +247,30 @@ button.btn-text:hover {
 
 /* Game Screen */
 .game-header {
-    padding: 2rem;
+    padding: 1.25rem 2rem;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 1rem;
     border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-color);
 }
 
 .target-header {
     display: flex;
     flex-direction: row;
-    gap: 2rem;
+    align-items: center;
+    gap: 1.5rem;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .target-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
 }
 
 .target-label {
@@ -259,10 +278,11 @@ button.btn-text:hover {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .target-value {
-    margin-top: 0.25rem;
+    margin-top: 0;
 }
 
 /* Mode badge in header */
@@ -715,7 +735,7 @@ button.btn-text:hover {
     padding: 0.35rem 0.75rem;
     border-radius: 2px;
     border: 1px solid var(--border-color);
-    background: transparent;
+    background-color: var(--bg-color);
     cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
     white-space: nowrap;
@@ -745,7 +765,7 @@ button.btn-text:hover {
 .hint-btn--available {
     color: var(--text-primary);
     border-color: var(--text-primary);
-    background: transparent;
+    background-color: var(--bg-color);
 }
 
 .hint-btn--available:hover {
@@ -771,7 +791,7 @@ button.btn-text:hover {
 .hint-btn--locked {
     color: var(--text-secondary);
     border-color: var(--border-color);
-    background: transparent;
+    background-color: var(--bg-color);
     opacity: 0.4;
     cursor: not-allowed;
 }
@@ -780,7 +800,7 @@ button.btn-text:hover {
 .hint-btn--loading {
     color: var(--text-secondary);
     border-color: var(--border-color);
-    background: transparent;
+    background-color: var(--bg-color);
     cursor: wait;
     opacity: 0.6;
 }
@@ -791,7 +811,7 @@ button.btn-text:hover {
     margin-top: 0.75rem;
     padding: 0.6rem 0.85rem;
     border-left: 2px solid var(--accent-color);
-    background: transparent;
+    background-color: var(--bg-color);
     font-size: 0.875rem;
     display: flex;
     gap: 0.4rem;

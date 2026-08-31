@@ -346,7 +346,7 @@ function _renderPath() {
             // Slot vide (placeholder — distance restante)
             node.className = 'path-node path-node--placeholder';
             node.innerHTML = `
-                <div class="node-dot node-dot--placeholder">…</div>
+                <div class="node-dot node-dot--placeholder"></div>
                 <div class="node-name node-name--placeholder">…</div>
             `;
         }
@@ -441,7 +441,11 @@ function _setCollaboratorsEnabled(enabled) {
 function _onCorrectGuess(artist) {
     _showFeedback("Excellente déduction !", 'success');
     Game.advanceTo(artist);
-    _renderPath();
+
+    // Pour la victoire immédiate, on rend le chemin tout de suite (pas de fetch distance)
+    if (Game.isVictory(artist.id)) {
+        _renderPath();
+    }
 
     setTimeout(async () => {
         if (_difficulty !== 'easy') {
@@ -469,11 +473,14 @@ function _onCorrectGuess(artist) {
                         await _autoFinish();
                         return;
                     }
-                    // Re-rendu avec la nouvelle distance (les placeholders s'ajustent)
+                    // Rendu unique : artiste + placeholders mis à jour en une seule passe
                     _renderPath();
                 } catch {
-                    // En cas d'erreur, on continue normalement
+                    // En cas d'erreur réseau, on rend quand même avec l'ancienne distance
+                    _renderPath();
                 }
+            } else {
+                _renderPath();
             }
             // Archiver le coût des indices et préparer le tour suivant
             Game.commitHintCost();
